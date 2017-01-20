@@ -7,12 +7,14 @@ defmodule GpioCounter.Worker do
 	@twos_pin 23
 	@fours_pin 18
 	
-	def start_link do
+	def start_link(name) do
 		IO.puts "Starting gpio counter"
-		GenServer.start_link(__MODULE__, nil, name: :gpio_counter)
+		GenServer.start_link(__MODULE__, nil, name: name)
 	end
 
 	def init(_) do
+		Process.flag(:trap_exit, true)
+
 		{:ok, upPin} = Gpio.start_link(@up_pin, :input)		
 		{:ok, downPin} = Gpio.start_link(@down_pin, :input)
 		:ok = Gpio.set_int(upPin, :rising)
@@ -48,6 +50,11 @@ defmodule GpioCounter.Worker do
   def handle_info({:gpio_interrupt, _pin, _condition}, state) do
     {:noreply, state}
   end
+
+	def terminate(_reason, state) do
+		set_counter_pins(state, 0)	
+		:ok		
+	end
 
 	defp set_counter_pins(%{:ones_pin => onesPin, :twos_pin => twosPin, :fours_pin => foursPin}, count) do
 		<<fours :: 1, twos :: 1, ones :: 1>> = <<count :: 3>>	

@@ -11,7 +11,7 @@ defmodule GpioCounter.Application do
     # Define workers and child supervisors to be supervised
     children = [
       # Starts a worker by calling: GpioCounter.Worker.start_link(arg1, arg2, arg3)
-      worker(GpioCounter.Worker, []),
+      worker(GpioCounter.Worker, [GpioCounter.Worker]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
